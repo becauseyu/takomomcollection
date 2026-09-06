@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>吉伊卡哇</title>
+    <title>Tako媽的吉伊卡哇蒐集圖鑑~ちいかわあつめ</title>
     <!-- 新增favicon -->
-	<link rel="shortcut icon" type="image/x-icon" href="/takomomcollection/public/ico/hachiware.ico">
+	<link rel="shortcut icon" type="image/x-icon" href="takomomcollection/public/ico/hachiware.ico">
 </head>
 <body class="relative min-h-screen text-slate-800 overflow-x-hidden
              before:content-[''] before:fixed before:inset-0 before:-z-10
@@ -19,7 +19,7 @@
                     <div class="chika-font">
                         <h1 class="mb-2">
                             <img 
-                                src="/takomomcollection/public/img/title.png"
+                                src="takomomcollection/public/img/title.png"
                                 alt="ちいかわ集め"
                                 class="mx-auto w-48 md:w-80 lg:w-full h-auto max-w-5xl"
                             >
@@ -40,14 +40,14 @@
                             v-model="searchQuery"
                             type="text" 
                             placeholder="請輸入標籤關鍵字"
-                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm md:text-base"
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#005AB5] text-sm md:text-base"
                         >
                         <div class="flex gap-2">
                             <button 
                                 @click="showTags = !showTags"
-                                class="flex-1 md:flex-none px-3 md:px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors whitespace-nowrap text-sm md:text-base"
+                                class="flex-1 md:flex-none px-3 md:px-4 py-2 bg-[#005AB5] text-white rounded-lg hover:bg-[#84C1FF] transition-colors whitespace-nowrap text-sm md:text-base"
                             >
-                                {{ showTags ? '隱藏' : '參考' }}
+                                {{ showTags ? '隱藏' : '關鍵字' }}
                             </button>
                             <button 
                                 @click="clearFilters"
@@ -62,7 +62,7 @@
                     <div v-if="showTags && allTags.length > 0" class="flex flex-wrap gap-2">
                         <button 
                             @click="selectedTags = []"
-                            :class="selectedTags.length === 0 ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700'"
+                            :class="selectedTags.length === 0 ? 'bg-[#83A7CE] text-white' : 'bg-gray-200 text-gray-700'"
                             class="px-3 py-1 rounded-full text-xs md:text-sm transition-colors"
                         >
                             全部
@@ -71,7 +71,7 @@
                             v-for="tag in allTags" 
                             :key="tag"
                             @click="toggleTag(tag)"
-                            :class="selectedTags.includes(tag) ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700'"
+                            :class="selectedTags.includes(tag) ? 'bg-[#83A7CE] text-white' : 'bg-gray-200 text-gray-700'"
                             class="px-3 py-1 rounded-full text-xs md:text-sm transition-colors"
                         >
                             {{ tag }}
@@ -80,9 +80,14 @@
                 </div>
             </div>
 
-            <!-- 加载状态 -->
+            <!-- 加載狀態 -->
             <div v-if="loading" class="max-w-7xl mx-auto px-4 text-center">
-                <p class="text-gray-600">寶寶加載中......</p>
+                <p class="text-gray-600 mb-4">寶寶加載中......</p>
+                <img 
+                    src="takomomcollection/public/img/loading.gif"
+                    alt="Loading..."
+                    class="mx-auto w-30 h-30 md:w-50 md:h-50"
+                >
             </div>
 
             <!-- 寶寶卡片 -->
@@ -132,7 +137,12 @@
 
             <!-- 無结果 -->
             <div v-if="!loading && filteredProducts.length === 0" class="max-w-7xl mx-auto px-4 text-center">
-                <p class="text-gray-600 text-lg">找不到匹配的娃娃 😢</p>
+                <p class="text-gray-600 text-lg">找不到符合的寶寶...只好買了</p>
+                <img 
+                    src="takomomcollection/public/img/nofound.gif"
+                    alt="Loading..."
+                    class="mx-auto w-30 h-30 md:w-50 md:h-50"
+                >
             </div>
 
             <!-- 詳細資訊 Modal -->
@@ -161,27 +171,27 @@
                             <!-- 詳細資訊 -->
                             <div class="space-y-4">
                                 <div>
-                                    <label class="font-bold text-gray-700">寶寶的主題</label>
+                                    <label class="font-bold text-[#003D79]">寶寶的主題</label>
                                     <p class="text-gray-600">{{ selectedProduct.品名 }}</p>
                                 </div>
 
                                 <div>
-                                    <label class="font-bold text-gray-700">寶寶從哪裡來</label>
+                                    <label class="font-bold text-[#003D79]">寶寶從哪裡來</label>
                                     <p class="text-gray-600">{{ selectedProduct.購入來源 || '無' }}</p>
                                 </div>
 
                                 <div>
-                                    <label class="font-bold text-gray-700">寶寶到職日</label>
+                                    <label class="font-bold text-[#003D79]">寶寶到職日</label>
                                     <p class="text-gray-600">{{ showDate(selectedProduct.購入時間) }}</p>
                                 </div>
 
                                 <div>
-                                    <label class="font-bold text-gray-700">寶寶的薪水</label>
-                                    <p class="text-purple-600 font-bold text-lg">{{ getPriceDisplay(selectedProduct) }}</p>
+                                    <label class="font-bold text-[#003D79]">寶寶的薪水</label>
+                                    <p class="text-gray-600 text-lg">{{ getPriceDisplay(selectedProduct) }}</p>
                                 </div>
 
                                 <div v-if="selectedProduct.標籤">
-                                    <label class="font-bold text-gray-700">相關標籤</label>
+                                    <label class="font-bold text-[#003D79]">相關標籤</label>
                                     <div class="flex flex-wrap gap-2 mt-2">
                                         <span 
                                             v-for="tag in parseTags(selectedProduct.標籤)"
@@ -220,7 +230,7 @@
             class="fixed bottom-8 right-8 z-40 hover:scale-110 transition-transform"
         >
             <img 
-                src="/takomomcollection/public/img/top.png"
+                src="takomomcollection/public/img/top.png"
                 alt="回到顶部"
                 class="w-20 h-20 md:w-28 md:h-28 cursor-pointer hover:opacity-80 transition-opacity"
             >
@@ -232,11 +242,11 @@
 <!-- Vue3.0  -->
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <!-- 共用主程式 -->
-<script type="text/javascript" src= "/takomomcollection/public/main/main.js" ></script>
+<script type="text/javascript" src= "takomomcollection/public/main/main.js" ></script>
 <!-- 訊息顯示SWAL -->
-<script type="text/javascript" src="/takomomcollection/public/sweetalert/sweetalert2.min.js"></script>
+<script type="text/javascript" src="takomomcollection/public/sweetalert/sweetalert2.min.js"></script>
 <!-- Google Apps Script -->
-<script type="text/javascript" src="/takomomcollection/public/gas/gas.js"></script>
+<script type="text/javascript" src="takomomcollection/public/gas/gas.js"></script>
 <script>
         const { createApp } = Vue;
         createApp({
