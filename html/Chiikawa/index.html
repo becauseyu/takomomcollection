@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>吉伊卡哇</title>
+    <!-- 新增favicon -->
+	<link rel="shortcut icon" type="image/x-icon" href="/takomomcollection/public/ico/hachiware.ico">
+</head>
+<body class="relative min-h-screen text-slate-800 overflow-x-hidden
+             before:content-[''] before:fixed before:inset-0 before:-z-10
+             before:bg-[url('https://images.alphacoders.com/134/thumb-1920-1345108.png')] before:bg-cover before:bg-center before:bg-no-repeat
+             before:opacity-40">
+    <div id="app">
+        <div class="min-h-screen py-8">
+            <!-- 頂部區塊 -->
+            <header class="mb-12">
+                <div class="max-w-7xl mx-auto px-4 text-center">
+                    <div class="chika-font">
+                        <h1 class="mb-2">
+                            <img 
+                                src="/takomomcollection/public/img/title.png"
+                                alt="ちいかわ集め"
+                                class="mx-auto w-48 md:w-80 lg:w-full h-auto max-w-5xl"
+                            >
+                        </h1>
+                        <p style="font-size: 18px; color: #4c586d;">
+                            符合條件的有 <span class="font-bold text-[#005AB5]">{{ filteredProducts.length }}</span> 個寶寶
+                        </p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 搜尋區塊 -->
+            <div class="max-w-7xl mx-auto px-4 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-4 md:p-6">
+                    <!-- 搜尋框 + 按鈕 (手機端換行) -->
+                    <div class="flex flex-col md:flex-row gap-2 mb-4">
+                        <input 
+                            v-model="searchQuery"
+                            type="text" 
+                            placeholder="請輸入標籤關鍵字"
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm md:text-base"
+                        >
+                        <div class="flex gap-2">
+                            <button 
+                                @click="showTags = !showTags"
+                                class="flex-1 md:flex-none px-3 md:px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors whitespace-nowrap text-sm md:text-base"
+                            >
+                                {{ showTags ? '隱藏' : '參考' }}
+                            </button>
+                            <button 
+                                @click="clearFilters"
+                                class="flex-1 md:flex-none px-3 md:px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors whitespace-nowrap text-sm md:text-base"
+                            >
+                                清除
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 標籤过滤 -->
+                    <div v-if="showTags && allTags.length > 0" class="flex flex-wrap gap-2">
+                        <button 
+                            @click="selectedTags = []"
+                            :class="selectedTags.length === 0 ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700'"
+                            class="px-3 py-1 rounded-full text-xs md:text-sm transition-colors"
+                        >
+                            全部
+                        </button>
+                        <button 
+                            v-for="tag in allTags" 
+                            :key="tag"
+                            @click="toggleTag(tag)"
+                            :class="selectedTags.includes(tag) ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700'"
+                            class="px-3 py-1 rounded-full text-xs md:text-sm transition-colors"
+                        >
+                            {{ tag }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 加载状态 -->
+            <div v-if="loading" class="max-w-7xl mx-auto px-4 text-center">
+                <p class="text-gray-600">寶寶加載中......</p>
+            </div>
+
+            <!-- 寶寶卡片 -->
+            <div v-if="!loading && filteredProducts.length > 0" class="max-w-7xl mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div 
+                        v-for="product in filteredProducts" 
+                        :key="product.id"
+                        class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                    >
+                        <!-- 寶寶卡片-圖片 -->
+                        <div class="aspect-square bg-gray-200 overflow-hidden cursor-pointer" @click="openModal(product)">
+                            <img 
+                                v-if="product.圖片" 
+                                :src="product.圖片" 
+                                :alt="product.品名"
+                                class="w-full h-full object-cover hover:scale-105 transition-transform"
+                            >
+                            <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
+                                <span>無法載入寶寶的美顏</span>
+                            </div>
+                        </div>
+
+                        <!-- 寶寶卡片-內容 -->
+                        <div class="p-4">
+                            <h3 class="font-bold text-lg text-gray-800 mb-2 truncate">{{ product.品名 }}</h3>
+
+                            <!-- 標籤 -->
+                            <div v-if="product.標籤" class="flex flex-wrap gap-1 mb-3">
+                                <span 
+                                    v-for="tag in parseTags(product.標籤)"
+                                    :key="tag"
+                                    class="text-xs bg-[#83A7CE] text-[#FFFFFF] px-2 py-1 rounded"
+                                >
+                                    {{ tag }}
+                                </span>
+                            </div>
+
+                            <!-- 備註 -->
+                            <p v-if="product.備註" class="text-xs text-gray-500 italic">
+                                {{ product.備註 }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 無结果 -->
+            <div v-if="!loading && filteredProducts.length === 0" class="max-w-7xl mx-auto px-4 text-center">
+                <p class="text-gray-600 text-lg">找不到匹配的娃娃 😢</p>
+            </div>
+
+            <!-- 詳細資訊 Modal -->
+            <div v-if="selectedProduct" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click="closeModal">
+                <div class="bg-white rounded-lg max-w-2xl w-full shadow-2xl" @click.stop>
+                    <!-- Modal 头部 -->
+                    <div class="flex justify-between items-center p-6 border-b">
+                        <h2 class="text-2xl font-bold text-gray-800">{{ selectedProduct.品名 }}</h2>
+                        <button @click="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                    </div>
+
+                    <!-- Modal 内容 -->
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- 图片 -->
+                            <div class="flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden aspect-square">
+                                <img 
+                                    v-if="selectedProduct.圖片" 
+                                    :src="selectedProduct.圖片" 
+                                    :alt="selectedProduct.品名"
+                                    class="w-full h-full object-cover"
+                                >
+                                <div v-else class="text-gray-400">無圖片</div>
+                            </div>
+
+                            <!-- 詳細資訊 -->
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="font-bold text-gray-700">寶寶的主題</label>
+                                    <p class="text-gray-600">{{ selectedProduct.品名 }}</p>
+                                </div>
+
+                                <div>
+                                    <label class="font-bold text-gray-700">寶寶從哪裡來</label>
+                                    <p class="text-gray-600">{{ selectedProduct.購入來源 || '無' }}</p>
+                                </div>
+
+                                <div>
+                                    <label class="font-bold text-gray-700">寶寶到職日</label>
+                                    <p class="text-gray-600">{{ showDate(selectedProduct.購入時間) }}</p>
+                                </div>
+
+                                <div>
+                                    <label class="font-bold text-gray-700">寶寶的薪水</label>
+                                    <p class="text-purple-600 font-bold text-lg">{{ getPriceDisplay(selectedProduct) }}</p>
+                                </div>
+
+                                <div v-if="selectedProduct.標籤">
+                                    <label class="font-bold text-gray-700">相關標籤</label>
+                                    <div class="flex flex-wrap gap-2 mt-2">
+                                        <span 
+                                            v-for="tag in parseTags(selectedProduct.標籤)"
+                                            :key="tag"
+                                            class="bg-[#83A7CE] text-[#FFFFFF] px-3 py-1 rounded-full text-sm"
+                                        >
+                                            {{ tag }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div v-if="selectedProduct.備註">
+                                    <label class="font-bold text-gray-700">備註</label>
+                                    <p class="text-gray-600">{{ selectedProduct.備註 }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal 底部 -->
+                    <div class="flex justify-end p-6 border-t gap-2">
+                        <button 
+                            @click="closeModal"
+                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                        >
+                            關閉
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 回到頂部浮動按鈕 -->
+        <button 
+            v-if="showScrollTop"
+            @click="scrollToTop"
+            class="fixed bottom-8 right-8 z-40 hover:scale-110 transition-transform"
+        >
+            <img 
+                src="/takomomcollection/public/img/top.png"
+                alt="回到顶部"
+                class="w-20 h-20 md:w-28 md:h-28 cursor-pointer hover:opacity-80 transition-opacity"
+            >
+        </button>
+    </div>
+</body>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Vue3.0  -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<!-- 共用主程式 -->
+<script type="text/javascript" src= "/takomomcollection/public/main/main.js" ></script>
+<!-- 訊息顯示SWAL -->
+<script type="text/javascript" src="/takomomcollection/public/sweetalert/sweetalert2.min.js"></script>
+<!-- Google Apps Script -->
+<script type="text/javascript" src="/takomomcollection/public/gas/gas.js"></script>
+<script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    products: [],
+                    searchQuery: '',
+                    selectedTags: [],
+                    loading: true,
+                    error: null,
+                    selectedProduct: null,  // 控制 卡片modal 顯示
+                    showTags: false,  // 控制標籤區塊 顯示
+                    showScrollTop: false,  // 控制浮動按鈕 顯示
+                }
+            },
+            computed: {
+                /*---------------------------------------------*/
+                // 過濾產品標籤
+                /*---------------------------------------------*/
+                filteredProducts() {
+                    return this.products.filter(product => {
+                        const searchLower = this.searchQuery.toLowerCase();
+                        const productTags = this.parseTags(product.標籤 || '');
+                        const matchSearch = 
+                            !this.searchQuery || 
+                            productTags.some(tag => tag.toLowerCase().includes(searchLower));
+
+                        let matchTags = true;
+                        if (this.selectedTags.length > 0) {
+                            matchTags = this.selectedTags.some(tag => productTags.includes(tag));
+                        }
+
+                        return matchSearch && matchTags;
+                    });
+                },
+                allTags() {
+                    const tags = new Set();
+                    this.products.forEach(product => {
+                        this.parseTags(product.標籤 || '').forEach(tag => tags.add(tag));
+                    });
+                    return Array.from(tags).sort();
+                },
+                totalCount() {
+                    return this.products.length;
+                }
+            },
+            methods: {
+                /*---------------------------------------------*/
+                // 得到試算表的資料
+                /*---------------------------------------------*/
+                async fetchData() {
+                    try {
+                        this.loading = true;
+                        this.error = null;
+                        // 從 Gas得到資料
+                        const rawData = await GetGasData("吉伊卡哇");
+                        const headers = rawData[0];
+                        this.products = rawData
+                        .slice(1) // 移除第一row(標題)
+                        .map(row => { // 每一行 做處理
+                            let obj = {};
+                            headers.forEach((header, index) => {
+                                obj[header] = row[index];
+                            });
+                            return obj;
+                        })
+                        .filter(obj => obj.id) // 過濾無資料的行
+                        ; 
+                        
+                    } catch (err) {
+                        this.error = err.message;
+                        console.error('取得寶寶資訊失敗:', err);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                /*---------------------------------------------*/
+                // 初始化標籤，這邊是用 # 來做分割
+                /*---------------------------------------------*/
+                parseTags(tagString) {
+                    if (!tagString) return [];
+                    return tagString.split('#').map(tag => tag.trim()).filter(tag => tag);
+                },
+                /*---------------------------------------------*/
+                // 標籤觸發查詢
+                /*---------------------------------------------*/
+                toggleTag(tag) {
+                    const index = this.selectedTags.indexOf(tag);
+                    if (index > -1) {
+                        this.selectedTags.splice(index, 1);
+                    } else {
+                        this.selectedTags.push(tag);
+                    }
+                },
+                /*---------------------------------------------*/
+                // 清除所有查詢條件
+                /*---------------------------------------------*/
+                clearFilters() {
+                    this.searchQuery = '';
+                    this.selectedTags = [];
+                },
+                /*---------------------------------------------*/
+                // 開啟卡片的modal
+                /*---------------------------------------------*/
+                openModal(product) {
+                    this.selectedProduct = product;
+                },
+                
+                /*---------------------------------------------*/
+                // 關閉卡片的modal
+                /*---------------------------------------------*/
+                closeModal() {
+                    this.selectedProduct = null;
+                },
+                
+                /*---------------------------------------------*/
+                // 取得價格的顯示格式
+                /*---------------------------------------------*/
+                getPriceDisplay(product) {
+                    const jpyPrice = product['購入價格(日幣)'];
+                    const twyPrice = product['購入價格(台幣)'];
+                    
+                    if (jpyPrice && jpyPrice !== '') {
+                        return `¥ ${jpyPrice}`;
+                    } else if (twyPrice && twyPrice !== '') {
+                        return `NT$ ${twyPrice}`;
+                    } else {
+                        return '無料';
+                    }
+                },
+                /*---------------------------------------------*/
+                // 監聽滾動，顯示/隱藏回到頂部按鈕
+                /*---------------------------------------------*/
+                handleScroll() {
+                    this.showScrollTop = window.scrollY > 300;
+                },
+
+                /*---------------------------------------------*/
+                // 回到頂部
+                /*---------------------------------------------*/
+                scrollToTop() {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+            },
+            /*---------------------------------------------*/
+            // 如果要用在 Vue的Template 中，一定要把它掛載到 VUE上
+            /*---------------------------------------------*/
+            created() {
+                this.showDate = window.showDate;
+            },
+            /*---------------------------------------------*/
+            // 載入後執行
+            /*---------------------------------------------*/
+            mounted() {
+                this.showDate = window.showDate;
+                // 添加滾動監聽
+                window.addEventListener('scroll', this.handleScroll);
+                this.fetchData();
+            },
+            /*---------------------------------------------*/
+            // 清理滾動監聽
+            /*---------------------------------------------*/
+            beforeUnmount() {
+                window.removeEventListener('scroll', this.handleScroll);
+            }
+        }).mount('#app');
+    </script>
+</html>
