@@ -126,10 +126,6 @@
                                 </span>
                             </div>
 
-                            <!-- 備註 -->
-                            <p v-if="product.備註" class="text-xs text-gray-500 italic">
-                                {{ product.備註 }}
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -146,8 +142,9 @@
             </div>
 
             <!-- 詳細資訊 Modal -->
-            <div v-if="selectedProduct" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click="closeModal">
-                <div class="bg-white rounded-lg max-w-2xl w-full shadow-2xl" @click.stop>
+            <div v-if="selectedProduct" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 pt-16 pb-20 overflow-y-auto"
+            @click="closeModal">
+                <div class="bg-white rounded-lg max-w-2xl w-full shadow-2xl flex flex-col max-h-[calc(100vh-120px)]" @click.stop>
                     <!-- Modal 头部 -->
                     <div class="flex justify-between items-center p-6 border-b">
                         <h2 class="text-2xl font-bold text-gray-800">{{ selectedProduct.品名 }}</h2>
@@ -201,11 +198,6 @@
                                             {{ tag }}
                                         </span>
                                     </div>
-                                </div>
-
-                                <div v-if="selectedProduct.備註">
-                                    <label class="font-bold text-gray-700">備註</label>
-                                    <p class="text-gray-600">{{ selectedProduct.備註 }}</p>
                                 </div>
                             </div>
                         </div>
