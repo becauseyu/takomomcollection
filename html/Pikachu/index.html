@@ -24,9 +24,32 @@
 
                 <!-- 桌面菜單 (md以上显示) -->
                 <div class="hidden md:flex gap-6 items-center">
-                    <a href="./index.html" class="text-gray-700 hover:text-[#005AB5] transition-colors font-medium"></a>
-                    <a href="./about.html" class="text-gray-700 hover:text-[#005AB5] transition-colors font-medium">關於</a>
-                    <a href="./contact.html" class="text-gray-700 hover:text-[#005AB5] transition-colors font-medium">聯絡</a>
+                    <a 
+                        href="./index.html" 
+                        class="flex items-center gap-1.5 text-gray-700 hover:text-[#005AB5] transition-colors font-medium pb-1 border-b-2"
+                        :class="isActive('index.html') ? 'border-[#005AB5] text-[#005AB5]' : 'border-transparent'"
+                    >
+                        <img 
+                            v-if="isActive('index.html')"
+                            src="https://cdn2.cdnstep.com/7nMicWJUjxIuxSjwmf1i/cover-1.thumb256.png"
+                            class="w-5 h-5"
+                            alt=""
+                        >
+                        寶寶尋找
+                    </a>
+                    <a 
+                        href="./dashboard.html" 
+                        class="flex items-center gap-1.5 text-gray-700 hover:text-[#005AB5] transition-colors font-medium pb-1 border-b-2"
+                        :class="isActive('dashboard.html') ? 'border-[#005AB5] text-[#005AB5]' : 'border-transparent'"
+                    >
+                        <img 
+                            v-if="isActive('dashboard.html')"
+                            src="https://cdn2.cdnstep.com/7nMicWJUjxIuxSjwmf1i/cover-1.thumb256.png"
+                            class="w-5 h-5"
+                            alt=""
+                        >
+                        寶寶數據
+                    </a>
                 </div>
 
                 <!-- 手機漢堡菜單 (md以下显示) -->
@@ -43,9 +66,20 @@
             <!-- 手機菜單 (展開時顯示) -->
             <div v-if="showMobileMenu" class="md:hidden border-t border-gray-200">
                 <div class="px-4 py-3 space-y-2">
-                    <a href="./index.html" class="block text-gray-700 hover:text-[#005AB5] hover:bg-gray-50 px-3 py-2 rounded transition-colors">首頁</a>
-                    <a href="./about.html" class="block text-gray-700 hover:text-[#005AB5] hover:bg-gray-50 px-3 py-2 rounded transition-colors">關於</a>
-                    <a href="./contact.html" class="block text-gray-700 hover:text-[#005AB5] hover:bg-gray-50 px-3 py-2 rounded transition-colors">聯絡</a>
+                    <a 
+                        href="./index.html" 
+                        class="block text-gray-700 hover:text-[#005AB5] px-3 py-2 rounded transition-colors"
+                        :class="isActive('index.html') ? 'bg-[#005AB5]/10 text-[#005AB5]' : 'hover:bg-gray-50'"
+                    >
+                        寶寶尋找
+                    </a>
+                    <a 
+                        href="./dashboard.html" 
+                        class="block text-gray-700 hover:text-[#005AB5] px-3 py-2 rounded transition-colors"
+                        :class="isActive('dashboard.html') ? 'bg-[#005AB5]/10 text-[#005AB5]' : 'hover:bg-gray-50'"
+                    >
+                        寶寶數據
+                    </a>
                 </div>
             </div>
         </nav>
@@ -339,7 +373,7 @@
                         this.loading = true;
                         this.error = null;
                         // 從 Gas得到資料
-                        const rawData = await GetGasData("吉伊卡哇");
+                        const rawData = await GetGasData("皮卡丘");
                         const headers = rawData[0];
                         this.products = rawData
                         .slice(1) // 移除第一row(標題)
@@ -359,6 +393,14 @@
                     } finally {
                         this.loading = false;
                     }
+                },
+                /*---------------------------------------------*/
+                // 判斷目前網址是否符合這個連結 (用來標示選中狀態)
+                /*---------------------------------------------*/
+                isActive(page) {
+                    // 取得目前網址的檔名,例如 /xxx/dashboard.html -> dashboard.html
+                    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+                    return currentPage === page;
                 },
                 /*---------------------------------------------*/
                 // 初始化標籤，這邊是用 # 來做分割

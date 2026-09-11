@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tako媽的吉伊卡哇開支紀錄ちいかわあつめ</title>
+    <!-- 新增favicon -->
+	<link rel="shortcut icon" type="image/x-icon" href="../../public/ico/hachiware.ico">
+</head>
+<body class="relative min-h-screen text-slate-800 overflow-x-hidden
+             before:content-[''] before:fixed before:inset-0 before:-z-10
+             before:bg-[url('https://images.alphacoders.com/134/thumb-1920-1345108.png')] before:bg-cover before:bg-center before:bg-no-repeat
+             before:opacity-40">
+    <div id="app">
+        <!-- 懸浮菜單-->
+        <nav v-if="showStickyNav" class="sticky top-0 left-0 right-0 bg-white shadow-md z-30">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                <!-- Logo (左側) -->
+                <img 
+                    src="../../public/img/title.png"
+                    alt="ちいかわ集め"
+                    class="w-20 md:w-60 h-auto flex-shrink-0"
+                >
+
+                <!-- 桌面菜單 (md以上显示) -->
+                <div class="hidden md:flex gap-6 items-center">
+                    <a href="./index.html" class="text-gray-700 hover:text-[#005AB5] transition-colors font-medium">寶寶圖鑑</a>
+                    <a href="./dashboard.html" class="text-gray-700 hover:text-[#005AB5] transition-colors font-medium">寶寶數據</a>
+                </div>
+
+                <!-- 手機漢堡菜單 (md以下显示) -->
+                <button 
+                    @click="showMobileMenu = !showMobileMenu"
+                    class="md:hidden p-2"
+                >
+                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 手機菜單 (展開時顯示) -->
+            <div v-if="showMobileMenu" class="md:hidden border-t border-gray-200">
+                <div class="px-4 py-3 space-y-2">
+                    <a href="./index.html" class="block text-gray-700 hover:text-[#005AB5] hover:bg-gray-50 px-3 py-2 rounded transition-colors">寶寶圖鑑</a>
+                    <a href="./dashboard.html" class="block text-gray-700 hover:text-[#005AB5] hover:bg-gray-50 px-3 py-2 rounded transition-colors">寶寶數據</a>
+                </div>
+            </div>
+        </nav>
+        <div class="max-w-5xl mx-auto px-4 py-6">
+            <!-- 頂部區塊 -->
+            <header class="mb-12">
+                <div class="max-w-7xl mx-auto px-4 text-center">
+                    <div class="chika-font">
+                        <h1 class="mb-2">
+                            <img 
+                                src="../../public/img/title.png"
+                                alt="ちいかわ集め"
+                                class="mx-auto w-48 md:w-80 lg:w-full h-auto max-w-5xl"
+                            >
+                        </h1>
+                    </div>
+                </div>
+            </header>
+            <div class="bg-white/90 backdrop-blur rounded-2xl shadow-md p-6">
+                <h2 class="text-xl font-bold mb-4 text-slate-800">目前累積花費</h2>
+                <div ref="expenseChart"></div>
+            </div>
+        </div>
+        
+        <!-- 回到頂部浮動按鈕 -->
+        <button 
+            v-if="showScrollTop"
+            @click="scrollToTop"
+            class="fixed bottom-8 right-8 z-40 hover:scale-110 transition-transform"
+        >
+            <img 
+                src="../../public/img/top.png"
+                alt="回到最上方"
+                class="w-20 h-20 md:w-28 md:h-28 cursor-pointer hover:opacity-80 transition-opacity"
+            >
+        </button>
+    </div>
+</body>
+
+<!-- ApexCharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Vue3.0  -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<!-- 共用主程式 -->
+<script type="text/javascript" src= "../../public/main/main.js" ></script>
+<!-- 訊息顯示SWAL -->
+<script type="text/javascript" src="../../public/sweetalert/sweetalert2.min.js"></script>
+<!-- Google Apps Script -->
+<script type="text/javascript" src="../../public/gas/gas.js"></script>
+<script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    showStickyNav: false,  // 控制浮動菜單 顯示
+                    showMobileMenu: false, // 控制手機菜單 顯示
+                    error: null,
+                }
+            },
+            computed: {
+               
+            },
+            
+            methods: {
+                /*---------------------------------------------*/
+                // 得到試算表的資料
+                /*---------------------------------------------*/
+                async fetchData() {
+                    try {
+                        this.loading = true;
+                        this.error = null;
+                        const rawData = await GetGasData("吉伊卡哇");
+                        const headers = rawData[0];
+                        this.products = rawData
+                            .slice(1)
+                            .map(row => {
+                                let obj = {};
+                                headers.forEach((header, index) => { obj[header] = row[index]; });
+                                return obj;
+                            })
+                            .filter(obj => obj.id);
+
+                        // 資料到位後畫圖
+                        this.$nextTick(() => this.renderExpenseChart());
+
+                    } catch (err) {
+                        this.error = err.message;
+                        console.error('取得寶寶資訊失敗:', err);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                /*---------------------------------------------*/
+                // 依 年-月 統計「當月花費」與「累積花費」(台幣)
+                /*---------------------------------------------*/
+                calcMonthlyExpense() {
+                    const monthlyMap = {};
+
+                    this.products.forEach(item => {
+                        const rawDate = item['購入時間'];
+                        if (!rawDate) return;
+
+                        const date = new Date(rawDate);
+                        if (isNaN(date.getTime())) return; // 日期格式不合法就跳過
+
+                        const ym = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+                        // 台幣優先,沒有的話用 日幣*0.2 四捨五入
+                        let twd = parseFloat(item['購入價格(台幣)']);
+                        if (isNaN(twd) || twd === 0) {
+                            const jpy = parseFloat(item['購入價格(日幣)']);
+                            twd = isNaN(jpy) ? 0 : Math.round(jpy * 0.2);
+                        }
+
+                        monthlyMap[ym] = (monthlyMap[ym] || 0) + twd;
+                    });
+
+                    // 依年月排序
+                    const sortedYm = Object.keys(monthlyMap).sort();
+
+                    let cumulative = 0;
+                    const monthly = [];
+                    const accumulated = [];
+
+                    sortedYm.forEach(ym => {
+                        cumulative += monthlyMap[ym];
+                        monthly.push(monthlyMap[ym]);
+                        accumulated.push(cumulative);
+                    });
+
+                    return { categories: sortedYm, monthly, accumulated };
+                },
+
+                /*---------------------------------------------*/
+                // 渲染趨勢圖 (長條=當月花費, 折線=累積花費)
+                /*---------------------------------------------*/
+                renderExpenseChart() {
+                    const { categories, monthly, accumulated } = this.calcMonthlyExpense();
+
+                    const options = {
+                        chart: {
+                            type: 'line',
+                            height: 350,
+                            toolbar: { show: false },
+                        },
+                        series: [
+                            { name: '當月花費 (TWD)', type: 'column', data: monthly },
+                            { name: '累積花費 (TWD)', type: 'line', data: accumulated },
+                        ],
+                        xaxis: {
+                            categories: categories, // 年-月
+                        },
+                        yaxis: [
+                            { title: { text: '當月花費 (TWD)' } },
+                            { opposite: true, title: { text: '累積花費 (TWD)' } },
+                        ],
+                        stroke: { width: [0, 3] },
+                        colors: ['#93c5fd', '#005AB5'],
+                        dataLabels: { enabled: false },
+                    };
+
+                    if (this.chartInstance) {
+                        this.chartInstance.updateOptions(options);
+                    } else {
+                        this.chartInstance = new ApexCharts(this.$refs.expenseChart, options);
+                        this.chartInstance.render();
+                    }
+                },
+                            /*---------------------------------------------*/
+                // 監聽滾動，顯示/隱藏回到頂部按鈕
+                /*---------------------------------------------*/
+                handleScroll() {
+                    this.showScrollTop = window.scrollY > 300; // 回最上方的顯示
+                    this.showStickyNav = window.scrollY > 400; // 顯示浮動菜單
+                },
+                /*---------------------------------------------*/
+                // 回到頂部
+                /*---------------------------------------------*/
+                scrollToTop() {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+            },
+            /*---------------------------------------------*/
+            // 如果要用在 Vue的Template 中，一定要把它掛載到 VUE上
+            /*---------------------------------------------*/
+            created() {
+                this.showDate = window.showDate;
+            },
+            /*---------------------------------------------*/
+            // 載入後執行
+            /*---------------------------------------------*/
+            mounted() {
+                this.showDate = window.showDate;
+                // 添加滾動監聽
+                window.addEventListener('scroll', this.handleScroll);
+                this.fetchData();
+            },
+            /*---------------------------------------------*/
+            // 清理滾動監聽
+            /*---------------------------------------------*/
+            beforeUnmount() {
+                window.removeEventListener('scroll', this.handleScroll);
+            }
+        }).mount('#app');
+    </script>
+</html>

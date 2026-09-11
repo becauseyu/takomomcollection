@@ -26,7 +26,7 @@ async  function GetGasData (projectName=null,sheetName="",para = {}){
         return loadData;
     }
     catch (error) {
-        error_msg(error, error.message, error.message);
+        // error_msg(error, error.message, error.message);
         return [];
     }
 }
