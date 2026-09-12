@@ -13,40 +13,12 @@
              before:opacity-40">
     <div id="app">
         <!-- 懸浮菜單-->
-        <nav v-if="showStickyNav" class="sticky top-0 left-0 right-0 bg-white shadow-md z-30">
-            <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-                <!-- Logo (左側) -->
-                <img 
-                    src="/takomomcollection/public/img/title.png"
-                    alt="ちいかわ集め"
-                    class="w-20 md:w-60 h-auto flex-shrink-0"
-                >
-
-                <!-- 桌面菜單 (md以上显示) -->
-                <div class="hidden md:flex gap-6 items-center">
-                    <a href="./index.html" class="text-gray-700 hover:text-[#005AB5] transition-colors font-medium">寶寶圖鑑</a>
-                    <a href="./dashboard.html" class="text-gray-700 hover:text-[#005AB5] transition-colors font-medium">寶寶數據</a>
-                </div>
-
-                <!-- 手機漢堡菜單 (md以下显示) -->
-                <button 
-                    @click="showMobileMenu = !showMobileMenu"
-                    class="md:hidden p-2"
-                >
-                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- 手機菜單 (展開時顯示) -->
-            <div v-if="showMobileMenu" class="md:hidden border-t border-gray-200">
-                <div class="px-4 py-3 space-y-2">
-                    <a href="./index.html" class="block text-gray-700 hover:text-[#005AB5] hover:bg-gray-50 px-3 py-2 rounded transition-colors">寶寶圖鑑</a>
-                    <a href="./dashboard.html" class="block text-gray-700 hover:text-[#005AB5] hover:bg-gray-50 px-3 py-2 rounded transition-colors">寶寶數據</a>
-                </div>
-            </div>
-        </nav>
+        <nav-bar 
+            :show="showStickyNav"
+            :logo-src="`/takomomcollection/public/img/${topicName}/title.png`"
+            logo-alt="ちいかわ集め"
+            :links="navLinks"
+        ></nav-bar>
 
         <div class="min-h-screen py-8">
             <!-- 頂部區塊 -->
@@ -55,7 +27,7 @@
                     <div class="chika-font">
                         <h1 class="mb-2">
                             <img 
-                                src="/takomomcollection/public/img/title.png"
+                                :src="`/takomomcollection/public/img/${topicName}/title.png`"
                                 alt="ちいかわ集め"
                                 class="mx-auto w-48 md:w-80 lg:w-full h-auto max-w-5xl"
                             >
@@ -121,7 +93,7 @@
             <div v-if="loading" class="max-w-7xl mx-auto px-4 text-center">
                 <p class="text-gray-600 mb-4">寶寶加載中......</p>
                 <img 
-                    src="/takomomcollection/public/img/loading.gif"
+                    src="/takomomcollection/public/img/Common/loading.gif"
                     alt="Loading..."
                     class="mx-auto w-30 h-30 md:w-50 md:h-50"
                 >
@@ -172,7 +144,7 @@
             <div v-if="!loading && filteredProducts.length === 0" class="max-w-7xl mx-auto px-4 text-center">
                 <p class="text-gray-600 text-lg">找不到符合的寶寶...只好買了</p>
                 <img 
-                    src="/takomomcollection/public/img/nofound.gif"
+                    :src="`/takomomcollection/public/img/${topicName}/nofound.gif`"
                     alt="Loading..."
                     class="mx-auto w-30 h-30 md:w-50 md:h-50"
                 >
@@ -257,34 +229,31 @@
             </div>
         </div>
         <!-- 回到頂部浮動按鈕 -->
-        <button 
-            v-if="showScrollTop"
-            @click="scrollToTop"
-            class="fixed bottom-8 right-8 z-40 hover:scale-110 transition-transform"
-        >
-            <img 
-                src="/takomomcollection/public/img/top.png"
-                alt="回到最上方"
-                class="w-20 h-20 md:w-28 md:h-28 cursor-pointer hover:opacity-80 transition-opacity"
-            >
-        </button>
+        <back-to-top :show="showScrollTop" :img-src="`/takomomcollection/public/img/${topicName}/top.png`"></back-to-top>
     </div>
 </body>
-
+<!-- CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Vue3.0  -->
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<!-- Vue的共用元件 & 邏輯,main.js 之前引入 -->
+<script src="/takomomcollection/public/vue-components/nav-bar.js"></script>
+<script src="/takomomcollection/public/vue-components/back-to-top.js"></script>
+<script src="/takomomcollection/public/vue-mixins/scroll-mixin.js"></script>
 <!-- 共用主程式 -->
-<script type="text/javascript" src= "/takomomcollection/public/main/main.js" ></script>
+<script type="text/javascript" src="/takomomcollection/public/cm-utils/main.js"></script>
 <!-- 訊息顯示SWAL -->
 <script type="text/javascript" src="/takomomcollection/public/sweetalert/sweetalert2.min.js"></script>
 <!-- Google Apps Script -->
-<script type="text/javascript" src="/takomomcollection/public/gas/gas.js"></script>
+<script type="text/javascript" src="/takomomcollection/public/cm-utils/gas.js"></script>
 <script>
         const { createApp } = Vue;
-        createApp({
+        const app = createApp({
+            mixins: [ScrollMixin],   // 混入 scroll 相關的 data / methods
+            // 這個頁面會用到的獨立資料
             data() {
                 return {
+                    topicName: 'Chiikawa',  // 主題代稱
                     products: [],
                     searchQuery: '',
                     selectedTags: [],
@@ -292,42 +261,13 @@
                     error: null,
                     selectedProduct: null,  // 控制 卡片modal 顯示
                     showTags: false,  // 控制標籤區塊 顯示
-                    showScrollTop: false,  // 控制浮動按鈕 顯示
-                    showStickyNav: false,  // 控制浮動菜單 顯示
-                    showMobileMenu: false, // 控制手機菜單 顯示
+                    navLinks: [ // NAV用的參數
+                        { path: 'index.html', label: '寶寶尋找' },
+                        { path: 'dashboard.html', label: '寶寶數據' },
+                    ],
                 }
             },
-            computed: {
-                /*---------------------------------------------*/
-                // 過濾產品標籤
-                /*---------------------------------------------*/
-                filteredProducts() {
-                    return this.products.filter(product => {
-                        const searchLower = this.searchQuery.toLowerCase();
-                        const productTags = this.parseTags(product.標籤 || '');
-                        const matchSearch = 
-                            !this.searchQuery || 
-                            productTags.some(tag => tag.toLowerCase().includes(searchLower));
-
-                        let matchTags = true;
-                        if (this.selectedTags.length > 0) {
-                            matchTags = this.selectedTags.some(tag => productTags.includes(tag));
-                        }
-
-                        return matchSearch && matchTags;
-                    });
-                },
-                allTags() {
-                    const tags = new Set();
-                    this.products.forEach(product => {
-                        this.parseTags(product.標籤 || '').forEach(tag => tags.add(tag));
-                    });
-                    return Array.from(tags).sort();
-                },
-                totalCount() {
-                    return this.products.length;
-                }
-            },
+            // 這個頁面會用到的方法
             methods: {
                 /*---------------------------------------------*/
                 // 得到試算表的資料
@@ -336,20 +276,19 @@
                     try {
                         this.loading = true;
                         this.error = null;
-                        // 從 Gas得到資料
-                        const rawData = await GetGasData("吉伊卡哇");
-                        const headers = rawData[0];
-                        this.products = rawData
-                        .slice(1) // 移除第一row(標題)
-                        .map(row => { // 每一行 做處理
-                            let obj = {};
-                            headers.forEach((header, index) => {
-                                obj[header] = row[index];
-                            });
-                            return obj;
-                        })
-                        .filter(obj => obj.id) // 過濾無資料的行
-                        ; 
+                        
+                        // 直接從你的 GitHub 靜態路徑 fetch 已經轉好的 json 檔案
+                        // 假設你的檔案放在專案的 assets/data.json 或公開網址
+                        const response = await fetch('./assets/data.json');
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP 錯誤！狀態碼：${response.status}`);
+                        }
+                        
+                        const rawData = await response.json();
+                        
+                        // Python 已經幫你轉好 key-value 物件了，這裡只需要直接過濾無資料的行
+                        this.products = rawData.filter(obj => obj.id);
                         
                     } catch (err) {
                         this.error = err.message;
@@ -426,6 +365,37 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 },
             },
+            computed: {
+                /*---------------------------------------------*/
+                // 過濾產品標籤
+                /*---------------------------------------------*/
+                filteredProducts() {
+                    return this.products.filter(product => {
+                        const searchLower = this.searchQuery.toLowerCase();
+                        const productTags = this.parseTags(product.標籤 || '');
+                        const matchSearch = 
+                            !this.searchQuery || 
+                            productTags.some(tag => tag.toLowerCase().includes(searchLower));
+
+                        let matchTags = true;
+                        if (this.selectedTags.length > 0) {
+                            matchTags = this.selectedTags.some(tag => productTags.includes(tag));
+                        }
+
+                        return matchSearch && matchTags;
+                    });
+                },
+                allTags() {
+                    const tags = new Set();
+                    this.products.forEach(product => {
+                        this.parseTags(product.標籤 || '').forEach(tag => tags.add(tag));
+                    });
+                    return Array.from(tags).sort();
+                },
+                totalCount() {
+                    return this.products.length;
+                }
+            },
             /*---------------------------------------------*/
             // 如果要用在 Vue的Template 中，一定要把它掛載到 VUE上
             /*---------------------------------------------*/
@@ -447,6 +417,11 @@
             beforeUnmount() {
                 window.removeEventListener('scroll', this.handleScroll);
             }
-        }).mount('#app');
+        });
+        // 全域註冊共用元件
+        app.component('nav-bar', NavBar);
+        app.component('back-to-top', BackToTop);
+
+        app.mount('#app');
     </script>
 </html>
