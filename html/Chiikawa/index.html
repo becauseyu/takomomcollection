@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tako媽的吉伊卡哇蒐集圖鑑~ちいかわあつめ</title>
     <!-- 新增favicon -->
-	<link rel="shortcut icon" type="image/x-icon" href="/takomomcollection/public/ico/hachiware.ico">
+	<link rel="shortcut icon" type="image/x-icon" href="../../public/ico/hachiware.ico">
 </head>
 <body class="relative min-h-screen text-slate-800 overflow-x-hidden
              before:content-[''] before:fixed before:inset-0 before:-z-10
@@ -15,7 +15,7 @@
         <!-- 懸浮菜單-->
         <nav-bar 
             :show="showStickyNav"
-            :logo-src="`/takomomcollection/public/img/${topicName}/title.png`"
+            :logo-src="`../../public/img/${topicName}/title.png`"
             logo-alt="ちいかわ集め"
             :links="navLinks"
         ></nav-bar>
@@ -27,7 +27,7 @@
                     <div class="chika-font">
                         <h1 class="mb-2">
                             <img 
-                                :src="`/takomomcollection/public/img/${topicName}/title.png`"
+                                :src="`../../public/img/${topicName}/title.png`"
                                 alt="ちいかわ集め"
                                 class="mx-auto w-48 md:w-80 lg:w-full h-auto max-w-5xl"
                             >
@@ -93,7 +93,7 @@
             <div v-if="loading" class="max-w-7xl mx-auto px-4 text-center">
                 <p class="text-gray-600 mb-4">寶寶加載中......</p>
                 <img 
-                    src="/takomomcollection/public/img/Common/loading.gif"
+                    src="../../public/img/Common/loading.gif"
                     alt="Loading..."
                     class="mx-auto w-30 h-30 md:w-50 md:h-50"
                 >
@@ -144,7 +144,7 @@
             <div v-if="!loading && filteredProducts.length === 0" class="max-w-7xl mx-auto px-4 text-center">
                 <p class="text-gray-600 text-lg">找不到符合的寶寶...只好買了</p>
                 <img 
-                    :src="`/takomomcollection/public/img/${topicName}/nofound.gif`"
+                    :src="`../../public/img/${topicName}/nofound.gif`"
                     alt="Loading..."
                     class="mx-auto w-30 h-30 md:w-50 md:h-50"
                 >
@@ -229,7 +229,7 @@
             </div>
         </div>
         <!-- 回到頂部浮動按鈕 -->
-        <back-to-top :show="showScrollTop" :img-src="`/takomomcollection/public/img/${topicName}/top.png`"></back-to-top>
+        <back-to-top :show="showScrollTop" :img-src="`../../public/img/${topicName}/top.png`"></back-to-top>
     </div>
 </body>
 <!-- CSS -->
@@ -237,15 +237,15 @@
 <!-- Vue3.0  -->
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <!-- Vue的共用元件 & 邏輯,main.js 之前引入 -->
-<script src="/takomomcollection/public/vue-components/nav-bar.js"></script>
-<script src="/takomomcollection/public/vue-components/back-to-top.js"></script>
-<script src="/takomomcollection/public/vue-mixins/scroll-mixin.js"></script>
+<script src="../../public/vue-components/nav-bar.js"></script>
+<script src="../../public/vue-components/back-to-top.js"></script>
+<script src="../../public/vue-mixins/scroll-mixin.js"></script>
 <!-- 共用主程式 -->
-<script type="text/javascript" src="/takomomcollection/public/cm-utils/main.js"></script>
+<script type="text/javascript" src="../../public/cm-utils/main.js"></script>
 <!-- 訊息顯示SWAL -->
-<script type="text/javascript" src="/takomomcollection/public/sweetalert/sweetalert2.min.js"></script>
+<script type="text/javascript" src="../../public/sweetalert/sweetalert2.min.js"></script>
 <!-- Google Apps Script -->
-<script type="text/javascript" src="/takomomcollection/public/cm-utils/gas.js"></script>
+<script type="text/javascript" src="../../public/cm-utils/gas.js"></script>
 <script>
         const { createApp } = Vue;
         const app = createApp({
@@ -277,9 +277,8 @@
                         this.loading = true;
                         this.error = null;
                         
-                        // 直接從你的 GitHub 靜態路徑 fetch 已經轉好的 json 檔案
-                        // 假設你的檔案放在專案的 assets/data.json 或公開網址
-                        const response = await fetch('./assets/data.json');
+                        // 從對應專案的路徑讀取轉好的 json 檔案
+                        const response = await fetch(`../../public/assets/${this.topicName}/data.json`);
                         
                         if (!response.ok) {
                             throw new Error(`HTTP 錯誤！狀態碼：${response.status}`);
@@ -287,8 +286,12 @@
                         
                         const rawData = await response.json();
                         
-                        // Python 已經幫你轉好 key-value 物件了，這裡只需要直接過濾無資料的行
-                        this.products = rawData.filter(obj => obj.id);
+                        this.products = rawData
+                        .filter(obj => obj.id) // 去除空白行
+                        .map(obj => ({
+                            ...obj,
+                            圖片: obj['圖片網址'] || obj['圖片'],  // 優先用新的圖片網址欄位
+                        }));
                         
                     } catch (err) {
                         this.error = err.message;
