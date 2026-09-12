@@ -41,6 +41,8 @@ const NavBar = {
                         v-for="link in links"
                         :key="link.path"
                         :href="'./' + link.path"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         class="flex items-center gap-1.5 text-gray-700 hover:text-[#005AB5] transition-colors font-medium pb-1 border-b-2"
                         :class="isActive(link.path) ? 'border-[#005AB5] text-[#005AB5]' : 'border-transparent'"
                     >

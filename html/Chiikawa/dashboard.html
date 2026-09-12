@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tako媽的吉伊卡哇開支紀錄ちいかわあつめ</title>
-    <!-- 新增favicon -->
-	<link rel="shortcut icon" type="image/x-icon" href="../../public /ico/hachiware.ico">
+    <title>Tako媽的吉伊卡哇開支紀錄~ちいかわあつめ</title>
+    <link rel="shortcut icon" type="image/x-icon" href="../../public/ico/hachiware.ico">
 </head>
 <body class="relative min-h-screen text-slate-800 overflow-x-hidden
              before:content-[''] before:fixed before:inset-0 before:-z-10
@@ -13,48 +12,20 @@
              before:opacity-40">
     <div id="app">
         <!-- 懸浮菜單-->
-        <nav v-if="showStickyNav" class="sticky top-0 left-0 right-0 bg-white shadow-md z-30">
-            <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-                <!-- Logo (左側) -->
-                <img 
-                    src="../../public /img/title.png"
-                    alt="ちいかわ集め"
-                    class="w-20 md:w-60 h-auto flex-shrink-0"
-                >
-
-                <!-- 桌面菜單 (md以上显示) -->
-                <div class="hidden md:flex gap-6 items-center">
-                    <a href="./index.html" class="text-gray-700 hover:text-[#005AB5] transition-colors font-medium">寶寶圖鑑</a>
-                    <a href="./dashboard.html" class="text-gray-700 hover:text-[#005AB5] transition-colors font-medium">寶寶數據</a>
-                </div>
-
-                <!-- 手機漢堡菜單 (md以下显示) -->
-                <button 
-                    @click="showMobileMenu = !showMobileMenu"
-                    class="md:hidden p-2"
-                >
-                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- 手機菜單 (展開時顯示) -->
-            <div v-if="showMobileMenu" class="md:hidden border-t border-gray-200">
-                <div class="px-4 py-3 space-y-2">
-                    <a href="./index.html" class="block text-gray-700 hover:text-[#005AB5] hover:bg-gray-50 px-3 py-2 rounded transition-colors">寶寶圖鑑</a>
-                    <a href="./dashboard.html" class="block text-gray-700 hover:text-[#005AB5] hover:bg-gray-50 px-3 py-2 rounded transition-colors">寶寶數據</a>
-                </div>
-            </div>
-        </nav>
+        <nav-bar 
+            :show="showStickyNav"
+            :logo-src="`../../public/img/${topicName}/title.png`"
+            logo-alt="ちいかわ集め"
+            :links="navLinks"
+        ></nav-bar>
+        <!-- 總量數據表-->
         <div class="max-w-5xl mx-auto px-4 py-6">
-            <!-- 頂部區塊 -->
             <header class="mb-12">
                 <div class="max-w-7xl mx-auto px-4 text-center">
                     <div class="chika-font">
                         <h1 class="mb-2">
                             <img 
-                                src="../../public /img/title.png"
+                                :src="`../../public/img/${topicName}/title.png`"
                                 alt="ちいかわ集め"
                                 class="mx-auto w-48 md:w-80 lg:w-full h-auto max-w-5xl"
                             >
@@ -63,72 +34,117 @@
                 </div>
             </header>
             <div class="bg-white/90 backdrop-blur rounded-2xl shadow-md p-6">
-                <h2 class="text-xl font-bold mb-4 text-slate-800">目前累積花費</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 左側：統計表格 -->
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 rounded-xl p-4">
+                            <p class="text-sm text-gray-500 mb-1">寶寶入坑日</p>
+                            <p class="text-xl font-bold text-[#005AB5]">{{ babyStats.firstDate }}</p>
+                        </div>
+                        <div class="bg-blue-50 rounded-xl p-4">
+                            <p class="text-sm text-gray-500 mb-1">貢獻給寶寶</p>
+                            <p class="text-xl font-bold text-[#005AB5]">NT$ {{ babyStats.totalSpent.toLocaleString() }}</p>
+                        </div>
+                        <div class="bg-blue-50 rounded-xl p-4">
+                            <p class="text-sm text-gray-500 mb-1">寶寶MVP</p>
+                            <p class="text-xl font-bold text-[#005AB5]">{{ babyStats.mvpDate }}</p>
+                            <p class="text-xs text-gray-400 mt-1">當天花費 NT$ {{ babyStats.mvpAmount.toLocaleString() }}</p>
+                        </div>
+                    </div>
+
+                    <!-- 右側：圓餅圖 -->
+                    <div>
+                        <div ref="sourceChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 目前累積花費-->
+        <div class="max-w-5xl mx-auto px-4 py-6">
+            <div class="bg-white/90 backdrop-blur rounded-2xl shadow-md p-6">
+                <h2 class="text-xl font-bold mb-4 text-slate-800">進貢寶寶週期表</h2>
                 <div ref="expenseChart"></div>
             </div>
         </div>
-        
         <!-- 回到頂部浮動按鈕 -->
-        <button 
-            v-if="showScrollTop"
-            @click="scrollToTop"
-            class="fixed bottom-8 right-8 z-40 hover:scale-110 transition-transform"
-        >
-            <img 
-                src="../../public /img/top.png"
-                alt="回到最上方"
-                class="w-20 h-20 md:w-28 md:h-28 cursor-pointer hover:opacity-80 transition-opacity"
-            >
-        </button>
+        <back-to-top :show="showScrollTop" :img-src="`../../public/img/${topicName}/top.png`"></back-to-top>
     </div>
 </body>
 
 <!-- ApexCharts -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<!-- CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Vue3.0  -->
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<!-- Vue的共用元件 & 邏輯,main.js 之前引入 -->
+<script src="../../public/vue-components/nav-bar.js"></script>
+<script src="../../public/vue-components/back-to-top.js"></script>
+<script src="../../public/vue-mixins/scroll-mixin.js"></script>
 <!-- 共用主程式 -->
-<script type="text/javascript" src= "../../public /main/main.js" ></script>
+<script type="text/javascript" src="../../public/cm-utils/main.js"></script>
 <!-- 訊息顯示SWAL -->
-<script type="text/javascript" src="../../public /sweetalert/sweetalert2.min.js"></script>
+<script type="text/javascript" src="../../public/sweetalert/sweetalert2.min.js"></script>
 <!-- Google Apps Script -->
-<script type="text/javascript" src="../../public /gas/gas.js"></script>
+<script type="text/javascript" src="../../public/cm-utils/gas.js"></script>
+
 <script>
         const { createApp } = Vue;
-        createApp({
+        const app = createApp({
+            mixins: [ScrollMixin],   // 混入 scroll 相關的 data / methods
+            // 這個頁面會用到的獨立資料
             data() {
                 return {
-                    showStickyNav: false,  // 控制浮動菜單 顯示
-                    showMobileMenu: false, // 控制手機菜單 顯示
+                    /* 共用區塊參數*/
+                    topicName: 'Chiikawa',   // 主題代稱，跟 index.html 一致
+                    navLinks: [ // NAV用的參數
+                        { path: 'index.html', label: '寶寶尋找' },
+                        { path: 'dashboard.html', label: '寶寶數據' },
+                    ],
+                    /* 本頁面參數*/
+                    products: [],
+                    loading: true,
+                    chartInstance: null,
+                    sourceChartInstance: null,   // 圓餅圖實例
+                    babyStats: {                  // 統計資料
+                        firstDate: '尚無資料',
+                        totalSpent: 0,
+                        mvpDate: '尚無資料',
+                        mvpAmount: 0,   // 改成金額，不是數量
+                    },
                     error: null,
                 }
             },
-            computed: {
-               
-            },
-            
             methods: {
                 /*---------------------------------------------*/
-                // 得到試算表的資料
+                // 得到 json 檔案的資料
                 /*---------------------------------------------*/
                 async fetchData() {
                     try {
                         this.loading = true;
                         this.error = null;
-                        const rawData = await GetGasData("吉伊卡哇");
-                        const headers = rawData[0];
-                        this.products = rawData
-                            .slice(1)
-                            .map(row => {
-                                let obj = {};
-                                headers.forEach((header, index) => { obj[header] = row[index]; });
-                                return obj;
-                            })
-                            .filter(obj => obj.id);
 
-                        // 資料到位後畫圖
-                        this.$nextTick(() => this.renderExpenseChart());
+                        const response = await fetch(`../../public/assets/${this.topicName}/data.json`);
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP 錯誤！狀態碼：${response.status}`);
+                        }
+
+                        const rawData = await response.json();
+
+                        this.products = rawData
+                            .filter(obj => obj.id)
+                            .map(obj => ({
+                                ...obj,
+                                圖片: obj['圖片網址'] || obj['圖片'],
+                            }));
+
+                        this.$nextTick(() =>{
+                            this.renderExpenseChart();
+                            this.calcBabyStats();        // 新增
+                            this.renderSourceChart();    // 新增
+                        });
 
                     } catch (err) {
                         this.error = err.message;
@@ -138,116 +154,182 @@
                     }
                 },
                 /*---------------------------------------------*/
-                // 依 年-月 統計「當月花費」與「累積花費」(台幣)
+                // 計算每個月的開支金額 (2026-04)
                 /*---------------------------------------------*/
                 calcMonthlyExpense() {
                     const monthlyMap = {};
+                    this.products.forEach(item => {
+                        const rawDate = item['購入時間'];
+                        if (!rawDate) return;
+
+                        const date = new Date(rawDate);
+                        if (isNaN(date.getTime())) return;
+
+                        const ym = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+                        let twd = parseCurrency(item['購入價格(台幣)']);
+                        if (twd === 0) {
+                            const jpy = parseCurrency(item['購入價格(日幣)']);
+                            twd = Math.round(jpy * 0.2);
+                        }
+
+                        monthlyMap[ym] = (monthlyMap[ym] || 0) + twd;
+                    });
+
+                    const sortedYm = Object.keys(monthlyMap).sort();
+                    const monthly = sortedYm.map(ym => monthlyMap[ym]);
+
+                    return { categories: sortedYm, monthly };
+                },/*---------------------------------------------*/
+                // ApexCharts 生成長條圖
+                /*---------------------------------------------*/
+                renderExpenseChart() {
+                    const { categories, monthly } = this.calcMonthlyExpense();
+
+                    // 判斷是否為手機寬度
+                    const isMobile = window.innerWidth < 768;
+
+                    const options = {
+                        chart: {
+                            type: 'bar',
+                            height: isMobile ? Math.max(350, categories.length * 40) : 350,
+                            toolbar: { show: false },
+                        },
+                        series: [
+                            { name: '當月花費 (TWD)', data: monthly },
+                        ],
+                        plotOptions: {
+                            bar: {
+                                horizontal: isMobile,  // 手機版橫向，桌面版直向
+                            },
+                        },
+                        xaxis: {
+                            categories: categories,
+                        },
+                        colors: ['#82afc2'],
+                        dataLabels: { enabled: false },
+                    };
+
+                    if (this.chartInstance) {
+                        this.chartInstance.destroy();  // type 從 line 改成 bar，用 updateOptions 可能無法正確切換，改用重建
+                    }
+                    this.chartInstance = new ApexCharts(this.$refs.expenseChart, options);
+                    this.chartInstance.render();
+                },
+                /*---------------------------------------------*/
+                /*---------------------------------------------*/
+                // 計算寶寶小檔案統計資料
+                /*---------------------------------------------*/
+                calcBabyStats() {
+                    if (this.products.length === 0) return;
+
+                    let earliestDate = null;
+                    let totalSpent = 0;
+                    const dailyAmountMap = {};   // 每天花費金額
 
                     this.products.forEach(item => {
                         const rawDate = item['購入時間'];
                         if (!rawDate) return;
 
                         const date = new Date(rawDate);
-                        if (isNaN(date.getTime())) return; // 日期格式不合法就跳過
+                        if (isNaN(date.getTime())) return;
 
-                        const ym = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-
-                        // 台幣優先,沒有的話用 日幣*0.2 四捨五入
-                        let twd = parseFloat(item['購入價格(台幣)']);
-                        if (isNaN(twd) || twd === 0) {
-                            const jpy = parseFloat(item['購入價格(日幣)']);
-                            twd = isNaN(jpy) ? 0 : Math.round(jpy * 0.2);
+                        // 找最早日期
+                        if (!earliestDate || date < earliestDate) {
+                            earliestDate = date;
                         }
 
-                        monthlyMap[ym] = (monthlyMap[ym] || 0) + twd;
+                        // 計算這筆金額
+                        let twd = parseCurrency(item['購入價格(台幣)']);
+                        if (twd === 0) {
+                            const jpy = parseCurrency(item['購入價格(日幣)']);
+                            twd = Math.round(jpy * 0.2);
+                        }
+                        totalSpent += twd;
+
+                        // 統計每天花費金額（用 yyyy-mm-dd 當 key）
+                        const dayKey = showDate(date);
+                        dailyAmountMap[dayKey] = (dailyAmountMap[dayKey] || 0) + twd;
                     });
 
-                    // 依年月排序
-                    const sortedYm = Object.keys(monthlyMap).sort();
-
-                    let cumulative = 0;
-                    const monthly = [];
-                    const accumulated = [];
-
-                    sortedYm.forEach(ym => {
-                        cumulative += monthlyMap[ym];
-                        monthly.push(monthlyMap[ym]);
-                        accumulated.push(cumulative);
+                    // 找出花費最多的一天
+                    let mvpDate = '尚無資料';
+                    let mvpAmount = 0;
+                    Object.keys(dailyAmountMap).forEach(day => {
+                        if (dailyAmountMap[day] > mvpAmount) {
+                            mvpAmount = dailyAmountMap[day];
+                            mvpDate = day;
+                        }
                     });
 
-                    return { categories: sortedYm, monthly, accumulated };
+                    this.babyStats = {
+                        firstDate: earliestDate ? showDate(earliestDate) : '尚無資料',
+                        totalSpent: totalSpent,
+                        mvpDate: mvpDate,
+                        mvpAmount: mvpAmount,
+                    };
                 },
+                /*---------------------------------------------*/
+                // 計算購入來源分佈（依數量統計百分比）
+                /*---------------------------------------------*/
+                calcSourceDistribution() {
+                    const sourceMap = {};
 
+                    this.products.forEach(item => {
+                        const source = item['購入來源'] || '未填寫';
+                        sourceMap[source] = (sourceMap[source] || 0) + 1;
+                    });
+
+                    const labels = Object.keys(sourceMap);
+                    const series = labels.map(label => sourceMap[label]);
+
+                    return { labels, series };
+                },
                 /*---------------------------------------------*/
-                // 渲染趨勢圖 (長條=當月花費, 折線=累積花費)
+                // 渲染購入來源圓餅圖
                 /*---------------------------------------------*/
-                renderExpenseChart() {
-                    const { categories, monthly, accumulated } = this.calcMonthlyExpense();
+                renderSourceChart() {
+                    const { labels, series } = this.calcSourceDistribution();
 
                     const options = {
                         chart: {
-                            type: 'line',
-                            height: 350,
-                            toolbar: { show: false },
+                            type: 'pie',
+                            height: 320,
                         },
-                        series: [
-                            { name: '當月花費 (TWD)', type: 'column', data: monthly },
-                            { name: '累積花費 (TWD)', type: 'line', data: accumulated },
-                        ],
-                        xaxis: {
-                            categories: categories, // 年-月
+                        labels: labels,
+                        series: series,
+                        colors: ['#496BA4', '#041E98', '#0D2D64', '#296E8C', '#475FD1', '#bfdbfe'],
+                        legend: {
+                            position: 'bottom',
                         },
-                        yaxis: [
-                            { title: { text: '當月花費 (TWD)' } },
-                            { opposite: true, title: { text: '累積花費 (TWD)' } },
-                        ],
-                        stroke: { width: [0, 3] },
-                        colors: ['#93c5fd', '#005AB5'],
-                        dataLabels: { enabled: false },
+                        dataLabels: {
+                            formatter: (val) => `${val.toFixed(1)}%`,
+                        },
                     };
 
-                    if (this.chartInstance) {
-                        this.chartInstance.updateOptions(options);
-                    } else {
-                        this.chartInstance = new ApexCharts(this.$refs.expenseChart, options);
-                        this.chartInstance.render();
+                    if (this.sourceChartInstance) {
+                        this.sourceChartInstance.destroy();
                     }
-                },
-                            /*---------------------------------------------*/
-                // 監聽滾動，顯示/隱藏回到頂部按鈕
-                /*---------------------------------------------*/
-                handleScroll() {
-                    this.showScrollTop = window.scrollY > 300; // 回最上方的顯示
-                    this.showStickyNav = window.scrollY > 400; // 顯示浮動菜單
-                },
-                /*---------------------------------------------*/
-                // 回到頂部
-                /*---------------------------------------------*/
-                scrollToTop() {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    this.sourceChartInstance = new ApexCharts(this.$refs.sourceChart, options);
+                    this.sourceChartInstance.render();
                 },
             },
-            /*---------------------------------------------*/
-            // 如果要用在 Vue的Template 中，一定要把它掛載到 VUE上
-            /*---------------------------------------------*/
             created() {
                 this.showDate = window.showDate;
             },
-            /*---------------------------------------------*/
-            // 載入後執行
-            /*---------------------------------------------*/
             mounted() {
                 this.showDate = window.showDate;
-                // 添加滾動監聽
                 window.addEventListener('scroll', this.handleScroll);
                 this.fetchData();
             },
-            /*---------------------------------------------*/
-            // 清理滾動監聽
-            /*---------------------------------------------*/
             beforeUnmount() {
                 window.removeEventListener('scroll', this.handleScroll);
             }
-        }).mount('#app');
+        });
+        // 全域註冊共用元件
+        app.component('nav-bar', NavBar);
+        app.component('back-to-top', BackToTop);
+
+        app.mount('#app');
     </script>
 </html>

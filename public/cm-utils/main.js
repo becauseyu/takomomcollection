@@ -62,3 +62,14 @@ function showDateTime(value){
     var val_time = val_Y + '-' + val_M + '-' + val_D + ' ' + val_Time
     return val_time;
 }
+/*---------------------------------------------*/
+// 清理貨幣格式字串，轉成純數字
+// 例如: "NT$250" -> 250, "¥1,290" -> 1290, "" -> 0
+/*---------------------------------------------*/
+function parseCurrency(value) {
+    if (!value) return 0;
+    // 移除所有非數字、非小數點、非負號的字元（貨幣符號、千分位逗號、空白等）
+    const cleaned = String(value).replace(/[^0-9.-]/g, '');
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
+}

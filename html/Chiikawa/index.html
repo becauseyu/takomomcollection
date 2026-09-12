@@ -176,32 +176,32 @@
                             <!-- 詳細資訊 -->
                             <div class="space-y-3 md:space-y-4">
                                 <div>
-                                    <label class="font-bold text-gray-700 text-sm md:text-base">品名</label>
+                                    <label class="font-bold text-[#182253] text-sm md:text-base">品名</label>
                                     <p class="text-gray-600 text-sm">{{ selectedProduct.品名 }}</p>
                                 </div>
 
                                 <div>
-                                    <label class="font-bold text-gray-700 text-sm md:text-base">購入來源</label>
+                                    <label class="font-bold text-[#182253] text-sm md:text-base">購入來源</label>
                                     <p class="text-gray-600 text-sm">{{ selectedProduct.購入來源 || '無' }}</p>
                                 </div>
 
                                 <div>
-                                    <label class="font-bold text-gray-700 text-sm md:text-base">到職日</label>
+                                    <label class="font-bold text-[#182253] text-sm md:text-base">到職日</label>
                                     <p class="text-gray-600 text-sm">{{ showDate(selectedProduct.購入時間) }}</p>
                                 </div>
 
                                 <div>
-                                    <label class="font-bold text-gray-700 text-sm md:text-base">價格</label>
-                                    <p class="text-purple-600 font-bold text-base md:text-lg">{{ getPriceDisplay(selectedProduct) }}</p>
+                                    <label class="font-bold text-[#182253] text-sm md:text-base">價格</label>
+                                    <p class="text-gray-600 text-lg">{{ getPriceDisplay(selectedProduct) }}</p>
                                 </div>
 
                                 <div v-if="selectedProduct.標籤">
-                                    <label class="font-bold text-gray-700 text-sm md:text-base">標籤</label>
+                                    <label class="font-bold text-[#182253] text-sm md:text-base">標籤</label>
                                     <div class="flex flex-wrap gap-2 mt-2">
                                         <span 
                                             v-for="tag in parseTags(selectedProduct.標籤)"
                                             :key="tag"
-                                            class="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs md:text-sm"
+                                            class="bg-[#0D2F83] text-[#FFFFFF] px-2 py-1 rounded-full text-xs md:text-sm"
                                         >
                                             {{ tag }}
                                         </span>
@@ -209,7 +209,7 @@
                                 </div>
 
                                 <div v-if="selectedProduct.備註">
-                                    <label class="font-bold text-gray-700 text-sm md:text-base">備註</label>
+                                    <label class="font-bold text-[#182253] text-sm md:text-base">備註</label>
                                     <p class="text-gray-600 text-sm">{{ selectedProduct.備註 }}</p>
                                 </div>
                             </div>
@@ -253,7 +253,13 @@
             // 這個頁面會用到的獨立資料
             data() {
                 return {
+                    /* 共用區塊參數*/
                     topicName: 'Chiikawa',  // 主題代稱
+                    navLinks: [ // NAV用的參數
+                        { path: 'index.html', label: '寶寶尋找' },
+                        { path: 'dashboard.html', label: '寶寶數據' },
+                    ],
+                    /* 本頁面參數*/
                     products: [],
                     searchQuery: '',
                     selectedTags: [],
@@ -261,10 +267,6 @@
                     error: null,
                     selectedProduct: null,  // 控制 卡片modal 顯示
                     showTags: false,  // 控制標籤區塊 顯示
-                    navLinks: [ // NAV用的參數
-                        { path: 'index.html', label: '寶寶尋找' },
-                        { path: 'dashboard.html', label: '寶寶數據' },
-                    ],
                 }
             },
             // 這個頁面會用到的方法
@@ -347,9 +349,9 @@
                     const twyPrice = product['購入價格(台幣)'];
                     
                     if (jpyPrice && jpyPrice !== '') {
-                        return `¥ ${jpyPrice}`;
+                        return ` ${jpyPrice}`;
                     } else if (twyPrice && twyPrice !== '') {
-                        return `NT$ ${twyPrice}`;
+                        return `${twyPrice}`;
                     } else {
                         return '無料';
                     }
