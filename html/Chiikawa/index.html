@@ -349,9 +349,9 @@
                     const twyPrice = product['購入價格(台幣)'];
                     
                     if (jpyPrice && jpyPrice !== '') {
-                        return ` ${jpyPrice}`;
+                        return ` ¥${jpyPrice}`;
                     } else if (twyPrice && twyPrice !== '') {
-                        return `${twyPrice}`;
+                        return `$${twyPrice}`;
                     } else {
                         return '無料';
                     }
